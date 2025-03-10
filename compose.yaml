@@ -1,0 +1,28 @@
+version: '1.2'
+
+services:
+  nest-project:
+    build:
+      context: ./nest-project
+      dockerfile: ./Dockerfile
+    image: nest-project
+    container_name: server1
+    ports:
+      - '3001:3001'
+    networks:
+      - my_network
+
+  nest-project-2:
+    build:
+      context: ./nest-project-2
+      dockerfile: ./Dockerfile
+    image: nest-project-2
+    container_name: server2
+    ports:
+      - '3002:3002'
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

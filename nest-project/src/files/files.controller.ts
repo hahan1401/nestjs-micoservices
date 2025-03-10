@@ -1,0 +1,56 @@
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesService } from './files.service';
+import { join } from 'path';
+import { createWriteStream, readFileSync, unlinkSync } from 'fs';
+
+@Controller('files')
+export class FilesController {
+  constructor(private readonly filesService: FilesService) {}
+
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { name: string },
+  ) {
+    return this.filesService.uploadFile({
+      ...file,
+      originalname: `${body.name}`,
+    });
+  }
+
+  @Post('/combine')
+  async combineChunks(
+    @Body() body: { uuid: string; totalChunks: number; fileName: string },
+  ) {
+    console.log('fileName', body.fileName);
+    const filePath = join(__dirname, '..', '..', 'uploads', body.fileName);
+    const writeStream = createWriteStream(filePath);
+    let chunkCount = 0;
+    await (async () => {
+      while (chunkCount <= body.totalChunks - 1) {
+        const chunkPath = join(
+          __dirname,
+          '..',
+          '..',
+          'uploads',
+          `${body.uuid}-${chunkCount}`,
+        );
+        const data = readFileSync(chunkPath);
+        writeStream.write(data);
+        unlinkSync(chunkPath);
+        chunkCount++;
+      }
+    })();
+
+    writeStream.end();
+    return `http://localhost:3001/uploads/${body.fileName}`;
+  }
+}
