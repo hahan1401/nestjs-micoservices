@@ -6,11 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CategoryEntity } from './category/entity/catgory.entity';
 import { HttpExceptionFilter } from './exceptions/http-exception';
 import { FilesController } from './files/files.controller';
 import { FilesModule } from './files/files.module';
 import { FilesService } from './files/files.service';
 import { ReponseInterceptor } from './interceptors/reponse.interceptor';
+import { PerfumeEntity } from './perfume/entity/perfume.entity';
+import { PerfumesController } from './perfume/perfume.controller';
+import { PerfumesModule } from './perfume/perfume.module';
+import { PerfumesService } from './perfume/perfume.service';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -18,18 +24,21 @@ import { ReponseInterceptor } from './interceptors/reponse.interceptor';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..'),
     }),
-    FilesModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'perfumes-store',
+      database: 'perfume_store',
       synchronize: true,
+      entities: [PerfumeEntity, CategoryEntity],
     }),
+    FilesModule,
+    PerfumesModule,
+    CategoryModule,
   ],
-  controllers: [AppController, FilesController],
+  controllers: [AppController, FilesController, PerfumesController],
   providers: [
     {
       provide: APP_INTERCEPTOR,
@@ -39,9 +48,10 @@ import { ReponseInterceptor } from './interceptors/reponse.interceptor';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+    HttpModule,
     AppService,
     FilesService,
-    HttpModule,
+    PerfumesService,
   ],
 })
 export class AppModule {}
