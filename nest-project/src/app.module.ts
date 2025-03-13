@@ -6,17 +6,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CategoryEntity } from './category/entity/catgory.entity';
+import { CategoryModule } from './category/category.module';
 import { HttpExceptionFilter } from './exceptions/http-exception';
 import { FilesController } from './files/files.controller';
 import { FilesModule } from './files/files.module';
 import { FilesService } from './files/files.service';
 import { ReponseInterceptor } from './interceptors/reponse.interceptor';
-import { PerfumeEntity } from './perfume/entity/perfume.entity';
+import { initializeDatabase } from './lib/database';
 import { PerfumesController } from './perfume/perfume.controller';
 import { PerfumesModule } from './perfume/perfume.module';
 import { PerfumesService } from './perfume/perfume.service';
-import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -24,15 +23,21 @@ import { CategoryModule } from './category/category.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..'),
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'perfume_store',
-      synchronize: true,
-      entities: [PerfumeEntity, CategoryEntity],
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => {
+        await initializeDatabase();
+        console.log('__dirname', __dirname);
+        return {
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          username: 'root',
+          password: 'root',
+          database: 'perfume_store',
+          synchronize: true,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        };
+      },
     }),
     FilesModule,
     PerfumesModule,
