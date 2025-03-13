@@ -3,6 +3,7 @@ import {
   Column,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -13,6 +14,7 @@ export class PerfumeEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({ length: 100 })
   name: string;
 
