@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
-import { PaginationParseIntPipe } from 'src/pipes/CustomParseInPipe.pipe';
+import { PaginationParseIntPipe } from 'src/pipes/PaginationParseIntPipe.pipe';
 import { PerfumesService } from './perfume.service';
 import { Perfume } from './schemas/perfume.schema';
 
@@ -33,13 +25,14 @@ export class PerfumesController {
     return this.perfumeService.create(perfume);
   }
 
-  // @Put()
-  // async update(@Body() perfume: CreatePerfumeDto) {
-  //   return this.perfumeService.update(perfume);
-  // }
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() perfume: Perfume) {
+    console.log('id', id);
+    return this.perfumeService.update(id, perfume);
+  }
 
-  @Delete(':id')
-  async softDelete(@Param('id') id: string) {
-    return this.perfumeService.softDelete(id);
+  @Post('/delete')
+  async softDelete(@Body('ids') ids: string[]) {
+    return this.perfumeService.softDelete(ids);
   }
 }

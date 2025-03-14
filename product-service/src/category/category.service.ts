@@ -17,8 +17,12 @@ export class CategoryService {
   }
 
   async getById(id: string): Promise<ResponseDTO<Category>> {
-    // await this.categoryModel.insertMany(CATEGORIES_DUMMY);
     const category = await this.categoryModel.findById(id).exec();
+    return new ResponseDTO<Category>(category);
+  }
+
+  async getByName(name: string): Promise<ResponseDTO<Category>> {
+    const category = await this.categoryModel.findOne({ name: name }).exec();
     return new ResponseDTO<Category>(category);
   }
 }

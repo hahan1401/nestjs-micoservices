@@ -18,7 +18,9 @@ import { PerfumesModule } from './perfume/perfume.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..'),
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
+    MongooseModule.forRoot(
+      'mongodb+srv://hanvietha141:hanvietha141@express-nextjs.2aezl0o.mongodb.net/perfume_shop?retryWrites=true&w=majority&appName=express-nextjs',
+    ),
     FilesModule,
     PerfumesModule,
     CategoryModule,

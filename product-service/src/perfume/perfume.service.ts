@@ -1,10 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpStatusCode } from 'axios';
+import { isNil } from 'lodash';
 import mongoose, { Model, PipelineStage } from 'mongoose';
 import { CategoryService } from 'src/category/category.service';
 import { Pagination } from 'src/common/Pagination';
 import { ResponseDTO } from 'src/DTO/response';
+import { DeleteItemStatus } from 'src/types/deleteItemStatus';
 import { Perfume } from './schemas/perfume.schema';
 
 @Injectable()
@@ -54,10 +56,13 @@ export class PerfumesService {
       },
       { $limit: pagination?.pageSize ?? Number.MAX_SAFE_INTEGER },
     ] satisfies PipelineStage[];
+    // await this.perfumeModel.create(
+    //   await generateDummyData(this.categoryService),
+    // );
 
-    // await this.perfumeModel.insertMany(PERFUMES_DUMMY);
-
-    const [perfumes, total] = await Promise.allSettled([
+    const [perfumes, total] = await Promise.allSettled<
+      [Promise<Perfume[]>, Promise<number>]
+    >([
       this.perfumeModel.aggregate(aggregationPipeline).exec(),
       this.perfumeModel.countDocuments(query).exec(),
     ]);
@@ -79,50 +84,61 @@ export class PerfumesService {
     return new ResponseDTO(savedPerfume);
   }
 
-  // async update(newPerfume: CreatePerfumeDto): Promise<ResponseDTO<PerfumeDto>> {
-  //   if (isNil(newPerfume.id))
-  //     throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
-
-  //   const { categoryId, ..._newPerfume } = newPerfume;
-  //   const perfume = await this.perfumesRepository.findOne({
-  //     where: { id: _newPerfume.id },
-  //   });
-
-  //   if (!perfume) {
-  //     throw new HttpException('Perfume not found', HttpStatusCode.BadRequest);
-  //   }
-
-  //   const newCategory = await this.categoryRepository.findOne({
-  //     where: {
-  //       id: categoryId,
-  //     },
-  //   });
-  //   if (!newCategory) {
-  //     throw new HttpException('Category not found', HttpStatusCode.BadRequest);
-  //   }
-
-  //   const newEntity = await new CreatePerfumeDto(_newPerfume).toEntity(
-  //     newCategory,
-  //   );
-
-  //   const updatedPerfume = await this.perfumesRepository.save(
-  //     this.perfumesRepository.merge(perfume, newEntity),
-  //   );
-
-  //   return new ResponseDTO(new PerfumeDto(updatedPerfume));
-  // }
-
-  async softDelete(id: string): Promise<ResponseDTO<string>> {
+  async update(id: string, newPerfume: Perfume): Promise<ResponseDTO<Perfume>> {
     try {
-      await this.perfumeModel
-        .findByIdAndUpdate(id, {
-          deletedDate: new Date().toISOString(),
-        })
+      if (isNil(id))
+        throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
+
+      const { categoryId, ..._newPerfume } = newPerfume;
+
+      const newCategory = await this.categoryService.getById(categoryId);
+      if (!newCategory) {
+        throw new HttpException(
+          'Category not found',
+          HttpStatusCode.BadRequest,
+        );
+      }
+
+      const data = await this.perfumeModel
+        .findByIdAndUpdate(id, _newPerfume, { new: true })
         .exec();
-      return new ResponseDTO('Success');
+
+      if (!data) {
+        throw new HttpException('Perfume not found', HttpStatusCode.BadRequest);
+      }
+
+      return new ResponseDTO(data);
     } catch (err) {
-      console.error(`Falled to delete item with id = ${id}`, err);
-      return new ResponseDTO(`Falled to delete item with id = ${id}`);
+      console.error('Update perfume error:', err);
+      throw new HttpException('Perfume not found', HttpStatusCode.BadRequest);
+    }
+  }
+
+  async softDelete(ids: string[]): Promise<ResponseDTO<DeleteItemStatus[]>> {
+    try {
+      const data = await Promise.allSettled<Promise<DeleteItemStatus>>(
+        ids.map(async (id) => {
+          try {
+            const data = await this.perfumeModel
+              .findByIdAndUpdate(id, {
+                deletedDate: new Date().toISOString(),
+              })
+              .exec();
+            if (data) return { status: true, id: id };
+            return { status: false, id: id };
+          } catch (err) {
+            console.error('Delete item failed at id=', id, '\n===', err);
+            return { status: false, id: id };
+          }
+        }),
+      );
+      const failedIds = data
+        .filter((item) => item.status === 'fulfilled')
+        .map((item) => item.value);
+      return new ResponseDTO<DeleteItemStatus[]>(failedIds);
+    } catch (err) {
+      console.error('Failed to delete perfumes', err);
+      throw new HttpException('', HttpStatusCode.InternalServerError);
     }
   }
 }

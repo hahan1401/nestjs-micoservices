@@ -1,25 +1,25 @@
-version: '1.2'
+version: "1.2"
 
 services:
-  nest-project:
+  product-service:
     build:
-      context: ./nest-project
+      context: ./product-service
       dockerfile: ./Dockerfile
-    image: nest-project
-    container_name: server1
+    image: product-service
+    container_name: product-service
     ports:
-      - '3001:3001'
+      - "3001:3001"
     networks:
       - my_network
 
-  nest-project-2:
+  payment-service:
     build:
-      context: ./nest-project-2
+      context: ./payment-service
       dockerfile: ./Dockerfile
-    image: nest-project-2
-    container_name: server2
+    image: payment-service
+    container_name: payment-service
     ports:
-      - '3002:3002'
+      - "3002:3002"
     networks:
       - my_network
 
