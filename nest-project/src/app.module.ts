@@ -29,8 +29,8 @@ import { PerfumesService } from './perfume/perfume.service';
         console.log('__dirname', __dirname);
         return {
           type: 'mysql',
-          // host: 'localhost',
-          host: '172.31.53.108',
+          host: 'localhost',
+          // host: '172.31.53.108',
           port: 3306,
           username: 'root',
           password: 'root',
@@ -60,4 +60,4 @@ import { PerfumesService } from './perfume/perfume.service';
     PerfumesService,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -9,6 +9,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { Pagination } from 'src/common/Pagination';
 import { CustomParseInPipe } from 'src/pipes/CustomParseInPipe.pipe';
 import { CreatePerfumeDto } from './dto/CreatePerfumeDto';
 import { PerfumesService } from './perfume.service';
@@ -19,10 +20,14 @@ export class PerfumesController {
 
   @Get('/')
   async getAll(
+    @Query() pagination?: Pagination,
     @Query('categoryId', CustomParseInPipe)
     categoryId?: string,
   ) {
-    return this.perfumeService.getAll({ categoryId });
+    return this.perfumeService.getAll({
+      categoryId,
+      pagination: pagination,
+    });
   }
 
   @Post('/')

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HttpStatusCode } from 'axios';
 import { isNil } from 'lodash';
 import { CategoryEntity } from 'src/category/entity/catgory.entity';
+import { Pagination } from 'src/common/Pagination';
 import { ResponseDTO } from 'src/DTO/response';
 import { Repository } from 'typeorm';
 import { CreatePerfumeDto } from './dto/CreatePerfumeDto';
@@ -19,12 +20,20 @@ export class PerfumesService {
 
   async getAll({
     categoryId,
+    pagination,
   }: {
+    pagination?: Pagination;
     categoryId?: string;
   }): Promise<ResponseDTO<PerfumeDto[]>> {
     const [perfumes, total] = await this.perfumesRepository.findAndCount({
       relations: ['category'],
       where: categoryId ? { category: { id: parseInt(categoryId) } } : {},
+      ...(pagination
+        ? {
+            skip: ((pagination.pageIndex ?? 1) - 1) * pagination.pageSize,
+            take: pagination.pageSize,
+          }
+        : {}),
     });
 
     return new ResponseDTO(
