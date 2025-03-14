@@ -4,15 +4,13 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
-  Put,
   Query,
 } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
-import { CustomParseInPipe } from 'src/pipes/CustomParseInPipe.pipe';
-import { CreatePerfumeDto } from './dto/CreatePerfumeDto';
+import { PaginationParseIntPipe } from 'src/pipes/CustomParseInPipe.pipe';
 import { PerfumesService } from './perfume.service';
+import { Perfume } from './schemas/perfume.schema';
 
 @Controller('perfumes')
 export class PerfumesController {
@@ -20,8 +18,8 @@ export class PerfumesController {
 
   @Get('/')
   async getAll(
-    @Query() pagination?: Pagination,
-    @Query('categoryId', CustomParseInPipe)
+    @Query(PaginationParseIntPipe) pagination?: Pagination,
+    @Query('categoryId')
     categoryId?: string,
   ) {
     return this.perfumeService.getAll({
@@ -31,17 +29,17 @@ export class PerfumesController {
   }
 
   @Post('/')
-  async create(@Body() perfume: CreatePerfumeDto) {
+  async create(@Body() perfume: Perfume) {
     return this.perfumeService.create(perfume);
   }
 
-  @Put()
-  async update(@Body() perfume: CreatePerfumeDto) {
-    return this.perfumeService.update(perfume);
-  }
+  // @Put()
+  // async update(@Body() perfume: CreatePerfumeDto) {
+  //   return this.perfumeService.update(perfume);
+  // }
 
   @Delete(':id')
-  async softDelete(@Param('id', ParseIntPipe) id: number) {
+  async softDelete(@Param('id') id: string) {
     return this.perfumeService.softDelete(id);
   }
 }

@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CategoryEntity } from 'src/category/entity/catgory.entity';
-import { PerfumeEntity } from './entity/perfume.entity';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CategoryModule } from 'src/category/category.module';
 import { PerfumesController } from './perfume.controller';
 import { PerfumesService } from './perfume.service';
+import { Perfume, PerfumeSchema } from './schemas/perfume.schema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PerfumeEntity, CategoryEntity])],
+  imports: [
+    MongooseModule.forFeature([{ name: Perfume.name, schema: PerfumeSchema }]),
+    CategoryModule,
+  ],
   controllers: [PerfumesController],
   providers: [PerfumesService],
-  exports: [TypeOrmModule],
+  exports: [PerfumesService],
 })
 export class PerfumesModule {}

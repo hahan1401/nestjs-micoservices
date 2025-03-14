@@ -6,9 +6,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FilesService } from './files.service';
-import { join } from 'path';
 import { createWriteStream, readFileSync, unlinkSync } from 'fs';
+import { join } from 'path';
+import { FilesService } from './files.service';
 
 @Controller('files')
 export class FilesController {
@@ -30,7 +30,6 @@ export class FilesController {
   async combineChunks(
     @Body() body: { uuid: string; totalChunks: number; fileName: string },
   ) {
-    console.log('fileName', body.fileName);
     const filePath = join(__dirname, '..', '..', 'uploads', body.fileName);
     const writeStream = createWriteStream(filePath);
     let chunkCount = 0;

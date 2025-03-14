@@ -1,7 +1,7 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ResponseDTO } from 'src/DTO/response';
 import { CategoryService } from './category.service';
-import { CategoryEntity } from './entity/catgory.entity';
+import { Category } from './chemas/category.schema';
 
 @Controller('category')
 export class CategoryController {
@@ -9,7 +9,7 @@ export class CategoryController {
   private readonly categoryService: CategoryService;
 
   @Get('/')
-  async getAll(): Promise<ResponseDTO<CategoryEntity[]>> {
+  async getAll(): Promise<ResponseDTO<Category[]>> {
     return this.categoryService.getAll();
   }
 }

@@ -5,7 +5,6 @@ import { join } from 'path';
 @Injectable()
 export class FilesService {
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    // console.log('file', file);
     const filePath = join(__dirname, '..', '..', 'uploads', file.originalname);
     const writeStream = createWriteStream(filePath);
     writeStream.write(file.buffer);
