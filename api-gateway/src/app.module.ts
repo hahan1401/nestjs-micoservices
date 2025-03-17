@@ -9,7 +9,7 @@ import { AppService } from './app.service';
       {
         name: 'PRODUCT_SERVICE',
         transport: Transport.TCP,
-        options: { port: 4001 },
+        options: { port: 4001, host: 'product-service' },
       },
     ]),
   ],

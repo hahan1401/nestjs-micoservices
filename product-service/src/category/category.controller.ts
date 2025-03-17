@@ -22,6 +22,7 @@ export class CategoryController {
       transport: Transport.TCP,
       options: {
         port: 4002,
+        host: 'payment-service',
       },
     });
   }

@@ -11,5 +11,5 @@ FROM base AS runner
 WORKDIR /app
 COPY --from=builder /app/dist ./
 COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 4001
+EXPOSE 4000
 CMD ["node", "main.js"]
