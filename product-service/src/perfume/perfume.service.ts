@@ -1,19 +1,27 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpStatusCode } from 'axios';
 import { isNil } from 'lodash';
 import mongoose, { Model, PipelineStage } from 'mongoose';
+import { BrandService } from 'src/brand/brand.service';
+import { BrandSchema } from 'src/brand/chemas/brand.schema';
 import { CategoryService } from 'src/category/category.service';
+import { CategorySchema } from 'src/category/chemas/category.schema';
 import { Pagination } from 'src/common/Pagination';
 import { ResponseDTO } from 'src/DTO/response';
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
-import { Perfume } from './schemas/perfume.schema';
+import {
+  Perfume,
+  PerfumeDocument,
+  PerfumePopulateKeys,
+} from './schemas/perfume.schema';
 
 @Injectable()
 export class PerfumesService {
   constructor(
     @InjectModel(Perfume.name) private perfumeModel: Model<Perfume>,
-    private readonly categoryService: CategoryService,
+    @Inject() private readonly categoryService: CategoryService,
+    @Inject() private readonly brandService: BrandService,
   ) {}
 
   async getAll({
@@ -22,22 +30,30 @@ export class PerfumesService {
   }: {
     pagination?: Pagination;
     categoryId?: string;
-  }): Promise<ResponseDTO<Perfume[]>> {
+  }): Promise<ResponseDTO<PerfumeDocument[]>> {
     const query = categoryId
       ? { categoryId: new mongoose.Types.ObjectId(categoryId) }
       : {};
-
     const aggregationPipeline = [
       { $match: query },
       {
         $lookup: {
-          from: 'categories',
-          localField: 'categoryId',
+          from: CategorySchema.get('collection'),
+          localField: PerfumePopulateKeys.categoryId,
           foreignField: '_id',
           as: 'category',
         },
       },
       { $unwind: '$category' },
+      {
+        $lookup: {
+          from: BrandSchema.get('collection'),
+          localField: PerfumePopulateKeys.brandId,
+          foreignField: '_id',
+          as: 'brand',
+        },
+      },
+      { $unwind: '$brand' },
       {
         $project: {
           name: 1,
@@ -47,6 +63,7 @@ export class PerfumesService {
           modifiedDate: 1,
           deletedDate: 1,
           category: '$category.name',
+          brand: '$brand.name',
         },
       },
       {
@@ -56,12 +73,13 @@ export class PerfumesService {
       },
       { $limit: pagination?.pageSize ?? Number.MAX_SAFE_INTEGER },
     ] satisfies PipelineStage[];
+
     // await this.perfumeModel.create(
-    //   await generateDummyData(this.categoryService),
+    //   await generateDummyData(this.categoryService, this.brandService),
     // );
 
     const [perfumes, total] = await Promise.allSettled<
-      [Promise<Perfume[]>, Promise<number>]
+      [Promise<PerfumeDocument[]>, Promise<number>]
     >([
       this.perfumeModel.aggregate(aggregationPipeline).exec(),
       this.perfumeModel.countDocuments(query).exec(),
@@ -71,9 +89,11 @@ export class PerfumesService {
     return new ResponseDTO(_perfumes, _total);
   }
 
-  async create(perfume: Perfume): Promise<ResponseDTO<Perfume>> {
+  async create(
+    perfume: PerfumeDocument,
+  ): Promise<ResponseDTO<PerfumeDocument>> {
     const category = (
-      await this.categoryService.getById(perfume.categoryId)
+      await this.categoryService.getById(perfume.categoryId.toString())
     ).getData();
 
     if (!category) {
@@ -84,14 +104,19 @@ export class PerfumesService {
     return new ResponseDTO(savedPerfume);
   }
 
-  async update(id: string, newPerfume: Perfume): Promise<ResponseDTO<Perfume>> {
+  async update(
+    id: string,
+    newPerfume: PerfumeDocument,
+  ): Promise<ResponseDTO<PerfumeDocument>> {
     try {
       if (isNil(id))
         throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
 
       const { categoryId, ..._newPerfume } = newPerfume;
 
-      const newCategory = await this.categoryService.getById(categoryId);
+      const newCategory = await this.categoryService.getById(
+        categoryId.toString(),
+      );
       if (!newCategory) {
         throw new HttpException(
           'Category not found',

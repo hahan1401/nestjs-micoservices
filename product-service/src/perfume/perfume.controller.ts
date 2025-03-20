@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
 import { PaginationParseIntPipe } from 'src/pipes/PaginationParseIntPipe.pipe';
 import { PerfumesService } from './perfume.service';
-import { Perfume } from './schemas/perfume.schema';
+import { PerfumeDocument } from './schemas/perfume.schema';
 
 @Controller('perfumes')
 export class PerfumesController {
@@ -21,12 +21,12 @@ export class PerfumesController {
   }
 
   @Post('/')
-  async create(@Body() perfume: Perfume) {
+  async create(@Body() perfume: PerfumeDocument) {
     return this.perfumeService.create(perfume);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() perfume: Perfume) {
+  async update(@Param('id') id: string, @Body() perfume: PerfumeDocument) {
     console.log('id', id);
     return this.perfumeService.update(id, perfume);
   }

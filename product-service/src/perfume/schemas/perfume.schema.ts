@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Brand } from 'src/brand/chemas/brand.schema';
+import { Category } from 'src/category/chemas/category.schema';
 
 @Schema({ collection: 'perfumes' })
 export class Perfume {
@@ -12,8 +14,11 @@ export class Perfume {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
-  categoryId: string;
+  @Prop({ type: mongoose.Types.ObjectId, ref: Category.name })
+  categoryId: mongoose.Types.ObjectId;
+
+  @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name })
+  brandId: mongoose.Types.ObjectId;
 
   @Prop({ required: true, default: () => new Date().toISOString() })
   createdDate?: string;
@@ -27,3 +32,8 @@ export class Perfume {
 
 export type PerfumeDocument = HydratedDocument<Perfume>;
 export const PerfumeSchema = SchemaFactory.createForClass(Perfume);
+
+export enum PerfumePopulateKeys {
+  brandId = 'brandId',
+  categoryId = 'categoryId',
+}
