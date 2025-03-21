@@ -1,5 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ResponseDTO } from 'src/DTO/response';
+import { ResponseDTO } from 'src/DTO/response.dto';
 import { CategoryService } from './category.service';
 import { Category } from './chemas/category.schema';
 

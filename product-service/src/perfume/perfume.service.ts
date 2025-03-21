@@ -8,8 +8,9 @@ import { BrandSchema } from 'src/brand/chemas/brand.schema';
 import { CategoryService } from 'src/category/category.service';
 import { CategorySchema } from 'src/category/chemas/category.schema';
 import { Pagination } from 'src/common/Pagination';
-import { ResponseDTO } from 'src/DTO/response';
+import { ResponseDTO } from 'src/DTO/response.dto';
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
+import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
 import {
   Perfume,
   PerfumeDocument,
@@ -27,13 +28,18 @@ export class PerfumesService {
   async getAll({
     categoryId,
     pagination,
+    brandId,
   }: {
     pagination?: Pagination;
     categoryId?: string;
-  }): Promise<ResponseDTO<PerfumeDocument[]>> {
-    const query = categoryId
-      ? { categoryId: new mongoose.Types.ObjectId(categoryId) }
-      : {};
+    brandId?: string;
+  }): Promise<ResponseDTO<PerufmeReponseDTO[]>> {
+    const _categoryId = categoryId && new mongoose.Types.ObjectId(categoryId);
+    const _brandId = brandId && new mongoose.Types.ObjectId(brandId);
+    const query = {
+      ...(_categoryId ? { categoryId: _categoryId } : {}),
+      ...(_brandId ? { brandId: _brandId } : {}),
+    };
     const aggregationPipeline = [
       { $match: query },
       {
@@ -79,12 +85,15 @@ export class PerfumesService {
     // );
 
     const [perfumes, total] = await Promise.allSettled<
-      [Promise<PerfumeDocument[]>, Promise<number>]
+      [Promise<PerufmeReponseDTO[]>, Promise<number>]
     >([
-      this.perfumeModel.aggregate(aggregationPipeline).exec(),
+      this.perfumeModel
+        .aggregate<PerufmeReponseDTO>(aggregationPipeline)
+        .exec(),
       this.perfumeModel.countDocuments(query).exec(),
     ]);
     const _perfumes = perfumes.status === 'fulfilled' ? perfumes.value : [];
+
     const _total = total.status === 'fulfilled' ? total.value : 0;
     return new ResponseDTO(_perfumes, _total);
   }

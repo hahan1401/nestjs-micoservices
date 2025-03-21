@@ -11,11 +11,12 @@ export class PerfumesController {
   @Get('/')
   async getAll(
     @Query(PaginationParseIntPipe) pagination?: Pagination,
-    @Query('categoryId')
-    categoryId?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('brandId') brandId?: string,
   ) {
     return this.perfumeService.getAll({
       categoryId,
+      brandId,
       pagination: pagination,
     });
   }
