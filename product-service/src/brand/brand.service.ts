@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import { Model } from 'mongoose';
 import { ResponseDTO } from 'src/DTO/response.dto';
 import { Brand, BrandDoctument } from './chemas/brand.schema';
-import { BRANDS_DUMMY } from './chemas/dummyData';
 
 @Injectable()
 export class BrandService {
@@ -15,7 +14,8 @@ export class BrandService {
 
   async getAll() {
     try {
-      await this.brandModel.insertMany(BRANDS_DUMMY);
+      // await this.brandModel.insertMany(BRANDS_DUMMY);
+
       const data = await this.brandModel.find();
       return new ResponseDTO(data);
     } catch (err) {

@@ -65,11 +65,11 @@ export class PerfumesService {
           name: 1,
           description: 1,
           price: 1,
-          createdDate: 1,
-          modifiedDate: 1,
-          deletedDate: 1,
           category: '$category.name',
           brand: '$brand.name',
+          createdAt: 1,
+          updatedAt: 1,
+          deletedAt: 1,
         },
       },
       {
@@ -155,7 +155,7 @@ export class PerfumesService {
           try {
             const data = await this.perfumeModel
               .findByIdAndUpdate(id, {
-                deletedDate: new Date().toISOString(),
+                deletedAt: new Date().toISOString(),
               })
               .exec();
             if (data) return { status: true, id: id };

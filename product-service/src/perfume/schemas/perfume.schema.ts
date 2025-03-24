@@ -3,7 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Brand } from 'src/brand/chemas/brand.schema';
 import { Category } from 'src/category/chemas/category.schema';
 
-@Schema({ collection: 'perfumes' })
+@Schema({ collection: 'perfumes', timestamps: true })
 export class Perfume {
   @Prop({ required: true })
   name: string;
@@ -20,14 +20,8 @@ export class Perfume {
   @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name })
   brandId: mongoose.Types.ObjectId;
 
-  @Prop({ required: true, default: () => new Date().toISOString() })
-  createdDate?: string;
-
-  @Prop({ required: true, default: () => new Date().toISOString() })
-  modifiedDate?: string;
-
   @Prop({ default: () => null })
-  deletedDate?: string;
+  deletedAt?: string;
 }
 
 export type PerfumeDocument = HydratedDocument<Perfume>;

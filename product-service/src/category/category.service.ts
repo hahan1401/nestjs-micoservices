@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ResponseDTO } from 'src/DTO/response.dto';
 import { Category, CategoryDoctument } from './chemas/category.schema';
-import { CATEGORIES_DUMMY } from './chemas/dummyData';
 
 @Injectable()
 export class CategoryService {
@@ -12,7 +11,8 @@ export class CategoryService {
   ) {}
 
   async getAll(): Promise<ResponseDTO<CategoryDoctument[]>> {
-    await this.categoryModel.insertMany(CATEGORIES_DUMMY);
+    // await this.categoryModel.insertMany(CATEGORIES_DUMMY);
+
     const categories = await this.categoryModel.find();
     return new ResponseDTO<CategoryDoctument[]>(categories);
   }

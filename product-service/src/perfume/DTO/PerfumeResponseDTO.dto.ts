@@ -7,7 +7,7 @@ export class PerufmeReponseDTO {
   private brand: string;
   private createdDate?: string;
   private modifiedDate?: string;
-  private deletedDate?: string;
+  private deletedAt?: string;
 
   constructor(perfumeDocument: PerufmeReponseDTO) {
     this._id = perfumeDocument._id;
@@ -18,7 +18,7 @@ export class PerufmeReponseDTO {
     this.brand = perfumeDocument.brand;
     this.createdDate = perfumeDocument.createdDate;
     this.modifiedDate = perfumeDocument.modifiedDate;
-    this.deletedDate = perfumeDocument.deletedDate;
+    this.deletedAt = perfumeDocument.deletedAt;
   }
 
   public toObject() {
@@ -31,7 +31,7 @@ export class PerufmeReponseDTO {
       brand: this.brand,
       createdDate: this.createdDate,
       modifiedDate: this.modifiedDate,
-      deletedDate: this.deletedDate,
+      deletedAt: this.deletedAt,
     };
   }
 }
