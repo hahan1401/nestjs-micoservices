@@ -1,37 +1,27 @@
 export class PerufmeReponseDTO {
-  private _id: string;
-  private name: string;
-  private description: string;
-  private price: number;
-  private category: string;
-  private brand: string;
-  private createdDate?: string;
-  private modifiedDate?: string;
-  private deletedAt?: string;
+  public _id: string;
+  public name: string;
+  public description: string;
+  public price: number;
+  public categories: string[];
+  public brand: string;
+  public createdAt?: string;
+  public updatedAt?: string;
+  public deletedAt?: string;
+  public remaining?: number;
+  public soldAmount?: number;
 
   constructor(perfumeDocument: PerufmeReponseDTO) {
     this._id = perfumeDocument._id;
     this.name = perfumeDocument.name;
     this.description = perfumeDocument.description;
     this.price = perfumeDocument.price;
-    this.category = perfumeDocument.category;
+    this.categories = perfumeDocument.categories;
     this.brand = perfumeDocument.brand;
-    this.createdDate = perfumeDocument.createdDate;
-    this.modifiedDate = perfumeDocument.modifiedDate;
+    this.createdAt = perfumeDocument.createdAt;
+    this.updatedAt = perfumeDocument.updatedAt;
     this.deletedAt = perfumeDocument.deletedAt;
-  }
-
-  public toObject() {
-    return {
-      _id: this._id,
-      name: this.name,
-      description: this.description,
-      price: this.price,
-      category: this.category,
-      brand: this.brand,
-      createdDate: this.createdDate,
-      modifiedDate: this.modifiedDate,
-      deletedAt: this.deletedAt,
-    };
+    this.remaining = perfumeDocument.remaining;
+    this.soldAmount = perfumeDocument.soldAmount;
   }
 }

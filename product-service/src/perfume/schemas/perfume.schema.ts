@@ -3,7 +3,9 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Brand } from 'src/brand/chemas/brand.schema';
 import { Category } from 'src/category/chemas/category.schema';
 
-@Schema({ collection: 'perfumes', timestamps: true })
+@Schema({
+  collection: 'perfumes',
+})
 export class Perfume {
   @Prop({ required: true })
   name: string;
@@ -14,8 +16,12 @@ export class Perfume {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ type: mongoose.Types.ObjectId, ref: Category.name, required: true })
-  categoryId: mongoose.Types.ObjectId;
+  @Prop({
+    type: [{ type: mongoose.Types.ObjectId, ref: Category.name }],
+    ref: Category.name,
+    required: true,
+  })
+  categoryIds: mongoose.Types.ObjectId[];
 
   @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name, required: true })
   brandId: mongoose.Types.ObjectId;
@@ -26,6 +32,12 @@ export class Perfume {
   @Prop({ type: Number, default: 0 })
   soldAmount: number;
 
+  @Prop({ required: true, default: () => new Date().toISOString() })
+  createdAt: string;
+
+  @Prop({ required: true, default: () => new Date().toISOString() })
+  updatedAt: string;
+
   @Prop({ default: () => null })
   deletedAt?: string;
 }
@@ -35,5 +47,5 @@ export const PerfumeSchema = SchemaFactory.createForClass(Perfume);
 
 export enum PerfumePopulateKeys {
   brandId = 'brandId',
-  categoryId = 'categoryId',
+  categoryIds = 'categoryIds',
 }

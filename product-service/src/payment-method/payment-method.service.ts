@@ -19,7 +19,7 @@ export class PaymentMethodService implements OnModuleInit {
         name: status,
       }));
       await this.paymentMethodModel.insertMany(paymentMethod);
-      console.log('Payment methods initialized');
+      console.info('Payment methods initialized');
     }
   }
 

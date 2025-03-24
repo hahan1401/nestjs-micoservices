@@ -19,7 +19,7 @@ export class OrderStatusService implements OnModuleInit {
         name: status,
       }));
       await this.orderStatusModel.insertMany(orderstatus);
-      console.log('Order status initialized');
+      console.info('Order status initialized');
     }
   }
 

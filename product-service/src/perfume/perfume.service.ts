@@ -1,21 +1,19 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpStatusCode } from 'axios';
+import dayjs from 'dayjs';
 import { isNil } from 'lodash';
 import mongoose, { Model, PipelineStage } from 'mongoose';
 import { BrandService } from 'src/brand/brand.service';
-import { BrandSchema } from 'src/brand/chemas/brand.schema';
+import { BrandDoctument, BrandSchema } from 'src/brand/chemas/brand.schema';
 import { CategoryService } from 'src/category/category.service';
 import { CategorySchema } from 'src/category/chemas/category.schema';
 import { Pagination } from 'src/common/Pagination';
 import { ResponseDTO } from 'src/DTO/response.dto';
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
+import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
-import {
-  Perfume,
-  PerfumeDocument,
-  PerfumePopulateKeys,
-} from './schemas/perfume.schema';
+import { Perfume, PerfumeDocument, PerfumePopulateKeys } from './schemas/perfume.schema';
 
 @Injectable()
 export class PerfumesService {
@@ -24,6 +22,19 @@ export class PerfumesService {
     @Inject() private readonly categoryService: CategoryService,
     @Inject() private readonly brandService: BrandService,
   ) {}
+
+  async findById(id: string): Promise<ResponseDTO<PerufmeReponseDTO>> {
+    if (isNil(id)) throw new HttpException('id is required', HttpStatusCode.BadRequest);
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
+
+    const data = await this.perfumeModel
+      .findById(id)
+      .populate(PerfumePopulateKeys.brandId, 'name')
+      .populate(PerfumePopulateKeys.categoryIds, 'name')
+      .exec();
+
+    return new ResponseDTO(this.PerfumePopulatedDto(data));
+  }
 
   async getAll({
     categoryId,
@@ -45,12 +56,11 @@ export class PerfumesService {
       {
         $lookup: {
           from: CategorySchema.get('collection'),
-          localField: PerfumePopulateKeys.categoryId,
+          localField: PerfumePopulateKeys.categoryIds,
           foreignField: '_id',
-          as: 'category',
+          as: 'categories',
         },
       },
-      { $unwind: '$category' },
       {
         $lookup: {
           from: BrandSchema.get('collection'),
@@ -65,7 +75,9 @@ export class PerfumesService {
           name: 1,
           description: 1,
           price: 1,
-          category: '$category.name',
+          categories: {
+            $map: { input: '$categories', as: 'b', in: '$$b.name' },
+          },
           brand: '$brand.name',
           createdAt: 1,
           updatedAt: 1,
@@ -73,9 +85,7 @@ export class PerfumesService {
         },
       },
       {
-        $skip:
-          ((pagination?.pageIndex ?? 1) - 1) *
-          (pagination?.pageSize ?? Number.MAX_SAFE_INTEGER),
+        $skip: ((pagination?.pageIndex ?? 1) - 1) * (pagination?.pageSize ?? Number.MAX_SAFE_INTEGER),
       },
       { $limit: pagination?.pageSize ?? Number.MAX_SAFE_INTEGER },
     ] satisfies PipelineStage[];
@@ -84,12 +94,8 @@ export class PerfumesService {
     //   await generateDummyData(this.categoryService, this.brandService),
     // );
 
-    const [perfumes, total] = await Promise.allSettled<
-      [Promise<PerufmeReponseDTO[]>, Promise<number>]
-    >([
-      this.perfumeModel
-        .aggregate<PerufmeReponseDTO>(aggregationPipeline)
-        .exec(),
+    const [perfumes, total] = await Promise.allSettled<[Promise<PerufmeReponseDTO[]>, Promise<number>]>([
+      this.perfumeModel.aggregate<PerufmeReponseDTO>(aggregationPipeline).exec(),
       this.perfumeModel.countDocuments(query).exec(),
     ]);
     const _perfumes = perfumes.status === 'fulfilled' ? perfumes.value : [];
@@ -98,54 +104,70 @@ export class PerfumesService {
     return new ResponseDTO(_perfumes, _total);
   }
 
-  async create(
-    perfume: PerfumeDocument,
-  ): Promise<ResponseDTO<PerfumeDocument>> {
-    const category = (
-      await this.categoryService.getById(perfume.categoryId.toString())
-    ).getData();
+  async create(perfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+    const { notFoundCategoryIds } = await this.handleCheckCategories(perfume.categoryIds.map((id) => id.toString()));
 
-    if (!category) {
-      throw new HttpException('Category not found', HttpStatusCode.BadRequest);
+    if (notFoundCategoryIds.length > 0) {
+      throw new HttpException(`CategoryIds not found: ${notFoundCategoryIds.join(', ')}`, HttpStatusCode.BadRequest);
     }
-    console.log('perfume', perfume);
-    const savedPerfume = await this.perfumeModel.create(perfume);
-    return new ResponseDTO(savedPerfume);
+
+    const foundBrand = await this.handleCheckBrand(perfume.brandId);
+
+    const brandIdBeingSaved = perfume.brandId ? { brandId: foundBrand._id } : {};
+
+    const categoriesBeingSaved =
+      perfume.categoryIds.length > 0
+        ? {
+            categoryIds: perfume.categoryIds.map((id) => new mongoose.Types.ObjectId(id)),
+          }
+        : {};
+
+    const savedPerfume = await this.perfumeModel.create({
+      ...perfume,
+      ...brandIdBeingSaved,
+      ...categoriesBeingSaved,
+    });
+
+    const newPerfume = await this.findById(savedPerfume._id.toString());
+
+    return new ResponseDTO(newPerfume.getData());
   }
 
-  async update(
-    id: string,
-    newPerfume: PerfumeDocument,
-  ): Promise<ResponseDTO<PerfumeDocument>> {
-    try {
-      if (isNil(id))
-        throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
+  async update(id: string, newPerfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+    if (isNil(id)) throw new HttpException('id is required', HttpStatusCode.BadRequest);
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
 
-      const { categoryId, ..._newPerfume } = newPerfume;
+    const { categoryIds, ..._newPerfume } = newPerfume;
 
-      const newCategory = await this.categoryService.getById(
-        categoryId.toString(),
-      );
-      if (!newCategory) {
-        throw new HttpException(
-          'Category not found',
-          HttpStatusCode.BadRequest,
-        );
-      }
+    const { notFoundCategoryIds } = await this.handleCheckCategories(categoryIds);
+    if (notFoundCategoryIds.length > 0) {
+      throw new HttpException(`CategoryIds not found: ${notFoundCategoryIds.join(', ')}`, HttpStatusCode.BadRequest);
+    }
 
-      const data = await this.perfumeModel
-        .findByIdAndUpdate(id, _newPerfume, { new: true })
-        .exec();
+    const brandIdBeingSaved = newPerfume.brandId ? { brandId: new mongoose.Types.ObjectId(newPerfume.brandId) } : {};
 
-      if (!data) {
-        throw new HttpException('Perfume not found', HttpStatusCode.BadRequest);
-      }
+    const categoriesBeingSaved =
+      newPerfume.categoryIds.length > 0
+        ? {
+            categoryIds: newPerfume.categoryIds.map((id) => new mongoose.Types.ObjectId(id)),
+          }
+        : {};
 
-      return new ResponseDTO(data);
-    } catch (err) {
-      console.error('Update perfume error:', err);
+    const data = await this.perfumeModel
+      .findByIdAndUpdate(
+        id,
+        { ..._newPerfume, ...brandIdBeingSaved, ...categoriesBeingSaved, updatedAt: dayjs().toISOString() },
+        { new: true },
+      )
+      .exec();
+
+    if (!data) {
       throw new HttpException('Perfume not found', HttpStatusCode.BadRequest);
     }
+
+    const _data = await this.findById(data._id.toString());
+
+    return new ResponseDTO(_data.getData());
   }
 
   async softDelete(ids: string[]): Promise<ResponseDTO<DeleteItemStatus[]>> {
@@ -166,13 +188,44 @@ export class PerfumesService {
           }
         }),
       );
-      const failedIds = data
-        .filter((item) => item.status === 'fulfilled')
-        .map((item) => item.value);
+      const failedIds = data.filter((item) => item.status === 'fulfilled').map((item) => item.value);
       return new ResponseDTO<DeleteItemStatus[]>(failedIds);
     } catch (err) {
       console.error('Failed to delete perfumes', err);
       throw new HttpException('', HttpStatusCode.InternalServerError);
     }
+  }
+
+  private async handleCheckCategories(ids: string[]): Promise<{ notFoundCategoryIds: string[] }> {
+    const categories = (await this.categoryService.find({ _id: { $in: ids } })).getData();
+    const foundCategoryIds = new Set(categories.map((category) => category._id.toString()));
+    const notFoundCategoryIds = ids.filter((id) => !foundCategoryIds.has(id.toString()));
+    return { notFoundCategoryIds: notFoundCategoryIds };
+  }
+
+  private PerfumePopulatedDto(perfume: PerfumeDocument): PerufmeReponseDTO {
+    return new PerufmeReponseDTO({
+      _id: perfume._id.toString(),
+      name: perfume.name,
+      description: perfume.description,
+      price: perfume.price,
+      categories: Array.isArray(perfume.categoryIds)
+        ? perfume.categoryIds.map((category) => ('name' in category ? category.name.toString() : null))
+        : [],
+      brand: typeof perfume.brandId === 'object' && 'name' in perfume.brandId ? perfume.brandId.name.toString() : null,
+      createdAt: perfume.createdAt,
+      updatedAt: perfume.updatedAt,
+      deletedAt: perfume.deletedAt,
+      remaining: perfume.remaining,
+      soldAmount: perfume.soldAmount,
+    });
+  }
+
+  private async handleCheckBrand(id: string): Promise<BrandDoctument> {
+    const brand = await this.brandService.getById(id);
+    if (!brand) {
+      throw new HttpException(`Brand id not found: ${id}`, HttpStatusCode.BadRequest);
+    }
+    return brand.getData();
   }
 }
