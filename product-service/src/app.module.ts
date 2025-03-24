@@ -11,7 +11,11 @@ import { CategoryModule } from './category/category.module';
 import { HttpExceptionFilter } from './exceptions/http-exception';
 import { FilesModule } from './files/files.module';
 import { ReponseInterceptor } from './interceptors/reponse.interceptor';
+import { OrderStatusModule } from './order-status/order-status.module';
+import { OrderModule } from './order/order.module';
+import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { PerfumesModule } from './perfume/perfume.module';
+import { ShippingMethodModule } from './shipping-method/shipping-method.module';
 
 @Module({
   imports: [
@@ -27,6 +31,10 @@ import { PerfumesModule } from './perfume/perfume.module';
     PerfumesModule,
     CategoryModule,
     BrandModule,
+    OrderModule,
+    OrderStatusModule,
+    PaymentMethodModule,
+    ShippingMethodModule,
   ],
   controllers: [AppController],
   providers: [

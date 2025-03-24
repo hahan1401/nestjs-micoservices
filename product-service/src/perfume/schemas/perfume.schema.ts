@@ -14,11 +14,17 @@ export class Perfume {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ type: mongoose.Types.ObjectId, ref: Category.name })
+  @Prop({ type: mongoose.Types.ObjectId, ref: Category.name, required: true })
   categoryId: mongoose.Types.ObjectId;
 
-  @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name })
+  @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name, required: true })
   brandId: mongoose.Types.ObjectId;
+
+  @Prop({ type: Number, default: 0 })
+  remaining: number;
+
+  @Prop({ type: Number, default: 0 })
+  soldAmount: number;
 
   @Prop({ default: () => null })
   deletedAt?: string;
