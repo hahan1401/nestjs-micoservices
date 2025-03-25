@@ -33,7 +33,7 @@ export class PerfumesService {
       .populate(PerfumePopulateKeys.categoryIds, 'name')
       .exec();
 
-    return new ResponseDTO(this.PerfumePopulatedDto(data));
+    return new ResponseDTO(this.PerfumePopulatedToDto(data));
   }
 
   async getAll({
@@ -45,6 +45,8 @@ export class PerfumesService {
     categoryId?: string;
     brandId?: string;
   }): Promise<ResponseDTO<PerufmeReponseDTO[]>> {
+    // await this.perfumeModel.create(await generateDummyData(this.categoryService, this.brandService));
+
     const _categoryId = categoryId && new mongoose.Types.ObjectId(categoryId);
     const _brandId = brandId && new mongoose.Types.ObjectId(brandId);
     const query = {
@@ -89,10 +91,6 @@ export class PerfumesService {
       },
       { $limit: pagination?.pageSize ?? Number.MAX_SAFE_INTEGER },
     ] satisfies PipelineStage[];
-
-    // await this.perfumeModel.create(
-    //   await generateDummyData(this.categoryService, this.brandService),
-    // );
 
     const [perfumes, total] = await Promise.allSettled<[Promise<PerufmeReponseDTO[]>, Promise<number>]>([
       this.perfumeModel.aggregate<PerufmeReponseDTO>(aggregationPipeline).exec(),
@@ -203,7 +201,7 @@ export class PerfumesService {
     return { notFoundCategoryIds: notFoundCategoryIds };
   }
 
-  private PerfumePopulatedDto(perfume: PerfumeDocument): PerufmeReponseDTO {
+  private PerfumePopulatedToDto(perfume: PerfumeDocument): PerufmeReponseDTO {
     return new PerufmeReponseDTO({
       _id: perfume._id.toString(),
       name: perfume.name,

@@ -16,6 +16,7 @@ import { OrderModule } from './order/order.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { PerfumesModule } from './perfume/perfume.module';
 import { ShippingMethodModule } from './shipping-method/shipping-method.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { ShippingMethodModule } from './shipping-method/shipping-method.module';
     // MongooseModule.forRoot(
     //   'mongodb+srv://hanvietha141:hanvietha141@express-nextjs.2aezl0o.mongodb.net/perfume_shop?retryWrites=true&w=majority&appName=express-nextjs',
     // ),
-    MongooseModule.forRoot('mongodb://192.168.1.16:27017/perfume_shop'),
+    MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
     FilesModule,
     PerfumesModule,
     CategoryModule,
@@ -35,6 +36,7 @@ import { ShippingMethodModule } from './shipping-method/shipping-method.module';
     OrderStatusModule,
     PaymentMethodModule,
     ShippingMethodModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [
