@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Customer } from 'src/customer/schemas/Customer.schema';
 import { OrderStatusEnum, PaymentMethodEnum, ShippingMethodEnum } from 'src/enums/Order';
 import { Perfume } from 'src/perfume/schemas/perfume.schema';
-
+console.log('Customer', Customer);
 @Schema({ collection: 'orders', timestamps: true })
 export class Order {
   @Prop({
@@ -38,8 +39,8 @@ export class Order {
   })
   amount: number;
 
-  // @Prop({ type: mongoose.Types.ObjectId, ref: Customer.name, required: true })
-  // customerId: mongoose.Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Customer.name, required: true })
+  customerId: mongoose.Types.ObjectId;
 }
 
 export type OrderDocument = HydratedDocument<Order>;

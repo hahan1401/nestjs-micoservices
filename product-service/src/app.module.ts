@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BrandModule } from './brand/brand.module';
 import { CategoryModule } from './category/category.module';
+import { CustomerModule } from './customer/customer.module';
 import { HttpExceptionFilter } from './exceptions/http-exception';
 import { FilesModule } from './files/files.module';
 import { ReponseInterceptor } from './interceptors/reponse.interceptor';
@@ -16,7 +17,6 @@ import { OrderModule } from './order/order.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { PerfumesModule } from './perfume/perfume.module';
 import { ShippingMethodModule } from './shipping-method/shipping-method.module';
-import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -27,16 +27,17 @@ import { CustomerModule } from './customer/customer.module';
     // MongooseModule.forRoot(
     //   'mongodb+srv://hanvietha141:hanvietha141@express-nextjs.2aezl0o.mongodb.net/perfume_shop?retryWrites=true&w=majority&appName=express-nextjs',
     // ),
-    MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
+    // MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
+    MongooseModule.forRoot('mongodb://192.168.1.16:27017/perfume_shop'),
     FilesModule,
     PerfumesModule,
     CategoryModule,
     BrandModule,
     OrderModule,
+    CustomerModule,
     OrderStatusModule,
     PaymentMethodModule,
     ShippingMethodModule,
-    CustomerModule,
   ],
   controllers: [AppController],
   providers: [
