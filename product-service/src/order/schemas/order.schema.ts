@@ -3,7 +3,6 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Customer } from 'src/customer/schemas/Customer.schema';
 import { OrderStatusEnum, PaymentMethodEnum, ShippingMethodEnum } from 'src/enums/Order';
 import { Perfume } from 'src/perfume/schemas/perfume.schema';
-console.log('Customer', Customer);
 @Schema({ collection: 'orders', timestamps: true })
 export class Order {
   @Prop({

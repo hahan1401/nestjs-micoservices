@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
+import { Public } from 'src/decorators/Public.decorator';
 import { PaginationParseIntPipe } from 'src/pipes/PaginationParseIntPipe.pipe';
 import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerfumesService } from './perfume.service';
@@ -8,6 +9,7 @@ import { PerfumesService } from './perfume.service';
 export class PerfumesController {
   constructor(private readonly perfumeService: PerfumesService) {}
 
+  @Public()
   @Get('/')
   async getAll(
     @Query(PaginationParseIntPipe) pagination?: Pagination,
