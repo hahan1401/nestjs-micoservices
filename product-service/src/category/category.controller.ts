@@ -1,5 +1,4 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { Public } from 'src/decorators/Public.decorator';
 import { ResponseDTO } from 'src/DTO/response.dto';
 import { CategoryService } from './category.service';
 import { Category } from './chemas/category.schema';
@@ -10,8 +9,8 @@ export class CategoryController {
   private readonly categoryService: CategoryService;
 
   @Get()
-  @Public()
   async getAll(): Promise<ResponseDTO<Category[]>> {
-    return this.categoryService.getAll();
+    const data = await this.categoryService.getAll();
+    return new ResponseDTO(data);
   }
 }

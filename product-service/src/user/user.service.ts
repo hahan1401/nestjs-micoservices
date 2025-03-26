@@ -8,7 +8,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
   async getByUserName(username: string): Promise<UserDocument> {
-    const user = await this.userModel.findOne({ username: username }).populate('roleId', 'name').exec();
+    const user = await this.userModel.findOne({ username: username }).exec();
     return user;
   }
 }

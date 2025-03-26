@@ -1,8 +1,11 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
 import { Public } from 'src/decorators/Public.decorator';
+import { ResponseDTO } from 'src/DTO/response.dto';
 import { PaginationParseIntPipe } from 'src/pipes/PaginationParseIntPipe.pipe';
+import { DeleteItemStatus } from 'src/types/deleteItemStatus';
 import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
+import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
 import { PerfumesService } from './perfume.service';
 
 @Controller('perfumes')
@@ -24,17 +27,20 @@ export class PerfumesController {
   }
 
   @Post('/')
-  async create(@Body() perfume: PerfumeCreateDto) {
-    return this.perfumeService.create(perfume);
+  async create(@Body() perfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+    const data = await this.perfumeService.create(perfume);
+    return new ResponseDTO(data);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() perfume: PerfumeCreateDto) {
-    return this.perfumeService.update(id, perfume);
+  async update(@Param('id') id: string, @Body() perfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+    const data = await this.perfumeService.update(id, perfume);
+    return new ResponseDTO(data);
   }
 
   @Post('/delete')
-  async softDelete(@Body('ids') ids: string[]) {
-    return this.perfumeService.softDelete(ids);
+  async softDelete(@Body('ids') ids: string[]): Promise<ResponseDTO<DeleteItemStatus[]>> {
+    const data = await this.perfumeService.softDelete(ids);
+    return new ResponseDTO(data);
   }
 }

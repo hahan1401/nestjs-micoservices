@@ -1,6 +1,8 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { Public } from 'src/decorators/Public.decorator';
+import { ResponseDTO } from 'src/DTO/response.dto';
 import { PaymentMethodService } from './payment-method.service';
+import { PaymentMethodDocument } from './schemas/PaymentMethod';
 
 @Controller('order-status')
 export class PaymentMethodController {
@@ -9,7 +11,8 @@ export class PaymentMethodController {
 
   @Get()
   @Public()
-  async getAll() {
-    return this.paymentMethodService.getAll();
+  async getAll(): Promise<ResponseDTO<PaymentMethodDocument[]>> {
+    const data = await this.paymentMethodService.getAll();
+    return new ResponseDTO(data);
   }
 }

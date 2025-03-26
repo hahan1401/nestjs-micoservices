@@ -1,11 +1,11 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { User } from '../schemas/User.chema';
 
-export class UserDto extends OmitType(User, ['roleId', 'password']) {
+export class UserResponseDto extends OmitType(User, ['roleId', 'password']) {
   _id: string;
   role: string;
 
-  constructor(user: UserDto) {
+  constructor(user: UserResponseDto) {
     super();
     this._id = user._id;
     this.createdAt = user.createdAt;

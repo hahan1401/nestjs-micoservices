@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { LoginResponseDto } from './DTO/LoginResponseDto.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
-interface AuthenticatedRequest extends ExpressRequest {
+interface LoginRequest extends ExpressRequest {
   user: UserDocument;
 }
 
@@ -18,7 +18,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Public()
   @Post('/login')
-  async login(@Request() req: AuthenticatedRequest): Promise<ResponseDTO<LoginResponseDto>> {
+  async login(@Request() req: LoginRequest): Promise<ResponseDTO<LoginResponseDto>> {
     const user = req.user;
     const token = await this.authService.login(user);
     return new ResponseDTO(token);

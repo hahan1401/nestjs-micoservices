@@ -1,7 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ResponseDTO } from 'src/DTO/response.dto';
 import { ShippingMethodEnum } from 'src/enums/Order';
 import { ShippingMethod, ShippingMethodDocument } from './schemas/ShippingMethod.schema';
 
@@ -23,8 +22,8 @@ export class ShippingMethodService implements OnModuleInit {
     }
   }
 
-  async getAll(): Promise<ResponseDTO<ShippingMethodDocument[]>> {
+  async getAll(): Promise<ShippingMethodDocument[]> {
     const shippingMethod = await this.shippingMethodModel.find();
-    return new ResponseDTO(shippingMethod);
+    return shippingMethod;
   }
 }

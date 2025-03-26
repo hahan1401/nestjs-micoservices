@@ -1,7 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ResponseDTO } from 'src/DTO/response.dto';
 import { OrderStatusEnum } from 'src/enums/Order';
 import { OrderStatus, OrderStatusDocument } from './schemas/OrderStatus.schema';
 
@@ -23,8 +22,8 @@ export class OrderStatusService implements OnModuleInit {
     }
   }
 
-  async getAll(): Promise<ResponseDTO<OrderStatusDocument[]>> {
+  async getAll(): Promise<OrderStatusDocument[]> {
     const orderstatus = await this.orderStatusModel.find();
-    return new ResponseDTO(orderstatus);
+    return orderstatus;
   }
 }

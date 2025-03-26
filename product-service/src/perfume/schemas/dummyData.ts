@@ -9,29 +9,29 @@ export const generateDummyData = async (categoryService: CategoryService, brandS
     description: 'A delightful floral fragrance.',
     price: 50,
     categoryIds: await Promise.all([
-      categoryService.getByName(CATEGORIES_DUMMY[0].name).then((resp) => resp.getData()._id),
-      categoryService.getByName(CATEGORIES_DUMMY[1].name).then((resp) => resp.getData()._id),
+      categoryService.getByName(CATEGORIES_DUMMY[0].name).then((resp) => resp._id),
+      categoryService.getByName(CATEGORIES_DUMMY[1].name).then((resp) => resp._id),
     ]),
-    brandId: await brandService.getByName(BRANDS_DUMMY[0].name).then((resp) => resp.getData()._id),
+    brandId: await brandService.getByName(BRANDS_DUMMY[0].name).then((resp) => resp._id),
   },
   {
     name: 'Forest Whisper',
     description: 'A deep woody scent.',
     price: 70,
     categoryIds: await Promise.all([
-      categoryService.getByName(CATEGORIES_DUMMY[1].name).then((resp) => resp.getData()._id),
-      categoryService.getByName(CATEGORIES_DUMMY[2].name).then((resp) => resp.getData()._id),
+      categoryService.getByName(CATEGORIES_DUMMY[1].name).then((resp) => resp._id),
+      categoryService.getByName(CATEGORIES_DUMMY[2].name).then((resp) => resp._id),
     ]),
-    brandId: await brandService.getByName(BRANDS_DUMMY[1].name).then((resp) => resp.getData()._id),
+    brandId: await brandService.getByName(BRANDS_DUMMY[1].name).then((resp) => resp._id),
   },
   {
     name: 'Citrus Burst',
     description: 'A refreshing citrus aroma.',
     price: 60,
     categoryIds: await Promise.all([
-      categoryService.getByName(CATEGORIES_DUMMY[0].name).then((resp) => resp.getData()._id),
-      categoryService.getByName(CATEGORIES_DUMMY[2].name).then((resp) => resp.getData()._id),
+      categoryService.getByName(CATEGORIES_DUMMY[0].name).then((resp) => resp._id),
+      categoryService.getByName(CATEGORIES_DUMMY[2].name).then((resp) => resp._id),
     ]),
-    brandId: await brandService.getByName(BRANDS_DUMMY[2].name).then((resp) => resp.getData()._id),
+    brandId: await brandService.getByName(BRANDS_DUMMY[2].name).then((resp) => resp._id),
   },
 ];

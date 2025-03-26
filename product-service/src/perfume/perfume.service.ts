@@ -23,7 +23,7 @@ export class PerfumesService {
     @Inject() private readonly brandService: BrandService,
   ) {}
 
-  async findById(id: string): Promise<ResponseDTO<PerufmeReponseDTO>> {
+  async findById(id: string): Promise<PerufmeReponseDTO> {
     if (isNil(id)) throw new HttpException('id is required', HttpStatusCode.BadRequest);
     if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
 
@@ -33,7 +33,7 @@ export class PerfumesService {
       .populate(PerfumePopulateKeys.categoryIds, 'name')
       .exec();
 
-    return new ResponseDTO(this.PerfumePopulatedToDto(data));
+    return this.PerfumePopulatedToDto(data);
   }
 
   async getAll({
@@ -102,7 +102,7 @@ export class PerfumesService {
     return new ResponseDTO(_perfumes, _total);
   }
 
-  async create(perfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+  async create(perfume: PerfumeCreateDto): Promise<PerufmeReponseDTO> {
     const { notFoundCategoryIds } = await this.handleCheckCategories(perfume.categoryIds.map((id) => id.toString()));
 
     if (notFoundCategoryIds.length > 0) {
@@ -128,10 +128,10 @@ export class PerfumesService {
 
     const newPerfume = await this.findById(savedPerfume._id.toString());
 
-    return new ResponseDTO(newPerfume.getData());
+    return newPerfume;
   }
 
-  async update(id: string, newPerfume: PerfumeCreateDto): Promise<ResponseDTO<PerufmeReponseDTO>> {
+  async update(id: string, newPerfume: PerfumeCreateDto): Promise<PerufmeReponseDTO> {
     if (isNil(id)) throw new HttpException('id is required', HttpStatusCode.BadRequest);
     if (!mongoose.Types.ObjectId.isValid(id)) throw new HttpException('Invalid id', HttpStatusCode.BadRequest);
 
@@ -165,10 +165,10 @@ export class PerfumesService {
 
     const _data = await this.findById(data._id.toString());
 
-    return new ResponseDTO(_data.getData());
+    return _data;
   }
 
-  async softDelete(ids: string[]): Promise<ResponseDTO<DeleteItemStatus[]>> {
+  async softDelete(ids: string[]): Promise<DeleteItemStatus[]> {
     try {
       const data = await Promise.allSettled<Promise<DeleteItemStatus>>(
         ids.map(async (id) => {
@@ -187,7 +187,7 @@ export class PerfumesService {
         }),
       );
       const failedIds = data.filter((item) => item.status === 'fulfilled').map((item) => item.value);
-      return new ResponseDTO<DeleteItemStatus[]>(failedIds);
+      return <DeleteItemStatus[]>failedIds;
     } catch (err) {
       console.error('Failed to delete perfumes', err);
       throw new HttpException('', HttpStatusCode.InternalServerError);
@@ -195,7 +195,7 @@ export class PerfumesService {
   }
 
   private async handleCheckCategories(ids: string[]): Promise<{ notFoundCategoryIds: string[] }> {
-    const categories = (await this.categoryService.find({ _id: { $in: ids } })).getData();
+    const categories = await this.categoryService.find({ _id: { $in: ids } });
     const foundCategoryIds = new Set(categories.map((category) => category._id.toString()));
     const notFoundCategoryIds = ids.filter((id) => !foundCategoryIds.has(id.toString()));
     return { notFoundCategoryIds: notFoundCategoryIds };
@@ -224,6 +224,6 @@ export class PerfumesService {
     if (!brand) {
       throw new HttpException(`Brand id not found: ${id}`, HttpStatusCode.BadRequest);
     }
-    return brand.getData();
+    return brand;
   }
 }
