@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Brand } from 'src/brand/chemas/brand.schema';
 import { Category } from 'src/category/chemas/category.schema';
+import { PerfumeCollection } from 'src/perfume-collections/schemas/PerfumeCollection.schema';
 
 @Schema({
   collection: 'perfumes',
 })
 export class Perfume {
-  @Prop({ required: true })
+  @Prop({ required: true, index: true, unique: true })
   name: string;
 
   @Prop({ required: true })
@@ -25,6 +26,9 @@ export class Perfume {
 
   @Prop({ type: mongoose.Types.ObjectId, ref: Brand.name, required: true })
   brandId: mongoose.Types.ObjectId;
+
+  @Prop({ type: mongoose.Types.ObjectId, ref: PerfumeCollection.name, required: true })
+  collectionId: mongoose.Types.ObjectId;
 
   @Prop({ type: Number, default: 0 })
   remaining: number;
@@ -48,4 +52,5 @@ export const PerfumeSchema = SchemaFactory.createForClass(Perfume);
 export enum PerfumePopulateKeys {
   brandId = 'brandId',
   categoryIds = 'categoryIds',
+  collectionId = 'collectionId',
 }

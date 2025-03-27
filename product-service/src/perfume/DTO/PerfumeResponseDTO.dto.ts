@@ -5,6 +5,7 @@ export class PerufmeReponseDTO {
   public price: number;
   public categories: string[];
   public brand: string;
+  public collection: string;
   public createdAt?: string;
   public updatedAt?: string;
   public deletedAt?: string;
@@ -18,6 +19,7 @@ export class PerufmeReponseDTO {
     this.price = perfumeDocument.price;
     this.categories = perfumeDocument.categories;
     this.brand = perfumeDocument.brand;
+    this.collection = perfumeDocument.collection;
     this.createdAt = perfumeDocument.createdAt;
     this.updatedAt = perfumeDocument.updatedAt;
     this.deletedAt = perfumeDocument.deletedAt;

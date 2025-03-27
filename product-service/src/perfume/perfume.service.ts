@@ -10,6 +10,8 @@ import { CategoryService } from 'src/category/category.service';
 import { CategorySchema } from 'src/category/chemas/category.schema';
 import { Pagination } from 'src/common/Pagination';
 import { ResponseDTO } from 'src/DTO/response.dto';
+import { PerfumeCollectionsService } from 'src/perfume-collections/perfume-collections.service';
+import { PerfumeCollectionSchema } from 'src/perfume-collections/schemas/PerfumeCollection.schema';
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
 import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
@@ -21,6 +23,7 @@ export class PerfumesService {
     @InjectModel(Perfume.name) private perfumeModel: Model<Perfume>,
     @Inject() private readonly categoryService: CategoryService,
     @Inject() private readonly brandService: BrandService,
+    @Inject() private readonly perfumeCollectionService: PerfumeCollectionsService,
   ) {}
 
   async findById(id: string): Promise<PerufmeReponseDTO> {
@@ -45,7 +48,9 @@ export class PerfumesService {
     categoryId?: string;
     brandId?: string;
   }): Promise<ResponseDTO<PerufmeReponseDTO[]>> {
-    // await this.perfumeModel.create(await generateDummyData(this.categoryService, this.brandService));
+    // await this.perfumeModel.create(
+    //   await generateDummyData(this.categoryService, this.brandService, this.perfumeCollectionService),
+    // );
 
     const _categoryId = categoryId && new mongoose.Types.ObjectId(categoryId);
     const _brandId = brandId && new mongoose.Types.ObjectId(brandId);
@@ -64,6 +69,9 @@ export class PerfumesService {
         },
       },
       {
+        $addFields: { categories: { $ifNull: ['$categories', []] } },
+      },
+      {
         $lookup: {
           from: BrandSchema.get('collection'),
           localField: PerfumePopulateKeys.brandId,
@@ -71,7 +79,26 @@ export class PerfumesService {
           as: 'brand',
         },
       },
-      { $unwind: '$brand' },
+      {
+        $unwind: {
+          path: '$brand',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: PerfumeCollectionSchema.get('collection'),
+          localField: PerfumePopulateKeys.collectionId,
+          foreignField: '_id',
+          as: 'collection',
+        },
+      },
+      {
+        $unwind: {
+          path: '$collection',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $project: {
           name: 1,
@@ -80,7 +107,8 @@ export class PerfumesService {
           categories: {
             $map: { input: '$categories', as: 'b', in: '$$b.name' },
           },
-          brand: '$brand.name',
+          brand: { $ifNull: ['$brand.name', null] },
+          collection: { $ifNull: ['$collection.name', null] },
           createdAt: 1,
           updatedAt: 1,
           deletedAt: 1,
@@ -211,6 +239,10 @@ export class PerfumesService {
         ? perfume.categoryIds.map((category) => ('name' in category ? category.name.toString() : null))
         : [],
       brand: typeof perfume.brandId === 'object' && 'name' in perfume.brandId ? perfume.brandId.name.toString() : null,
+      collection:
+        typeof perfume.collectionId === 'object' && 'name' in perfume.collectionId
+          ? perfume.collectionId.name.toString()
+          : null,
       createdAt: perfume.createdAt,
       updatedAt: perfume.updatedAt,
       deletedAt: perfume.deletedAt,

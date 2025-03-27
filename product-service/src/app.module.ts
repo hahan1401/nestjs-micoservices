@@ -19,6 +19,7 @@ import { ReponseInterceptor } from './interceptors/reponse.interceptor';
 import { OrderStatusModule } from './order-status/order-status.module';
 import { OrderModule } from './order/order.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
+import { PerfumeCollectionsModule } from './perfume-collections/perfume-collections.module';
 import { PerfumesModule } from './perfume/perfume.module';
 import { RoleModule } from './role/role.module';
 import { ShippingMethodModule } from './shipping-method/shipping-method.module';
@@ -34,8 +35,8 @@ import { UserModule } from './user/user.module';
     // MongooseModule.forRoot(
     //   'mongodb+srv://hanvietha141:hanvietha141@express-nextjs.2aezl0o.mongodb.net/perfume_shop?retryWrites=true&w=majority&appName=express-nextjs',
     // ),
-    MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
-    // MongooseModule.forRoot('mongodb://192.168.1.16:27017/perfume_shop'),
+    // MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
+    MongooseModule.forRoot('mongodb://192.168.1.29:27017/perfume_shop'),
     FilesModule,
     PerfumesModule,
     CategoryModule,
@@ -59,6 +60,7 @@ import { UserModule } from './user/user.module';
       }),
       global: true,
     }),
+    PerfumeCollectionsModule,
   ],
   controllers: [AppController],
   providers: [
