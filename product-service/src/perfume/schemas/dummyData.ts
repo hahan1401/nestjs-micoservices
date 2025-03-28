@@ -22,6 +22,7 @@ export const generateDummyData = async (
     collectionId: await perfumeCollectionService
       .getByName(PerfumeCollectionEnum.Female.toString())
       .then((resp) => resp._id),
+    imageUrl: 'https://lanperfume.com/wp-content/uploads/2024/11/fullbox-oddity-naked-dance-3.png',
   },
   {
     name: 'Forest Whisper',
@@ -35,6 +36,7 @@ export const generateDummyData = async (
     collectionId: await perfumeCollectionService
       .getByName(PerfumeCollectionEnum.Male.toString())
       .then((resp) => resp._id),
+    imageUrl: 'https://lanperfume.com/wp-content/uploads/2024/11/fullbox-exnihilo-fleur-narcotique-3.png',
   },
   {
     name: 'Citrus Burst',
@@ -48,5 +50,6 @@ export const generateDummyData = async (
     collectionId: await perfumeCollectionService
       .getByName(PerfumeCollectionEnum.Unisex.toString())
       .then((resp) => resp._id),
+    imageUrl: 'https://lanperfume.com/wp-content/uploads/2024/11/fullbox-exnihilo-fleur-narcotique-3.png',
   },
 ];

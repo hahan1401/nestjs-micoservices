@@ -109,6 +109,7 @@ export class PerfumesService {
           },
           brand: { $ifNull: ['$brand.name', null] },
           collection: { $ifNull: ['$collection.name', null] },
+          imageUrl: 1,
           createdAt: 1,
           updatedAt: 1,
           deletedAt: 1,
@@ -248,6 +249,7 @@ export class PerfumesService {
       deletedAt: perfume.deletedAt,
       remaining: perfume.remaining,
       soldAmount: perfume.soldAmount,
+      imageUrl: perfume.imageUrl,
     });
   }
 

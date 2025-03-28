@@ -35,8 +35,8 @@ import { UserModule } from './user/user.module';
     // MongooseModule.forRoot(
     //   'mongodb+srv://hanvietha141:hanvietha141@express-nextjs.2aezl0o.mongodb.net/perfume_shop?retryWrites=true&w=majority&appName=express-nextjs',
     // ),
-    // MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
-    MongooseModule.forRoot('mongodb://192.168.1.29:27017/perfume_shop'),
+    MongooseModule.forRoot('mongodb://localhost:27017/perfume_shop'),
+    // MongooseModule.forRoot('mongodb://192.168.1.29:27017/perfume_shop'),
     FilesModule,
     PerfumesModule,
     CategoryModule,

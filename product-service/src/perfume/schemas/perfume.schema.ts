@@ -15,6 +15,9 @@ export class Perfume {
   description: string;
 
   @Prop({ required: true })
+  imageUrl: string;
+
+  @Prop({ required: true })
   price: number;
 
   @Prop({
