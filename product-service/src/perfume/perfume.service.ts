@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpStatusCode } from 'axios';
 import dayjs from 'dayjs';
@@ -15,16 +15,27 @@ import { PerfumeCollectionSchema } from 'src/perfume-collections/schemas/Perfume
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
 import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
+import { generateDummyData } from './schemas/dummyData';
 import { Perfume, PerfumeDocument, PerfumePopulateKeys } from './schemas/perfume.schema';
 
 @Injectable()
-export class PerfumesService {
+export class PerfumesService implements OnModuleInit {
   constructor(
     @InjectModel(Perfume.name) private perfumeModel: Model<Perfume>,
     @Inject() private readonly categoryService: CategoryService,
     @Inject() private readonly brandService: BrandService,
     @Inject() private readonly perfumeCollectionService: PerfumeCollectionsService,
   ) {}
+
+  async onModuleInit() {
+    const isExisted = (await this.perfumeModel.countDocuments()) > 0;
+    if (!isExisted) {
+      await this.perfumeModel.create(
+        await generateDummyData(this.categoryService, this.brandService, this.perfumeCollectionService),
+      );
+      console.info('Perfumes initialized');
+    }
+  }
 
   async findById(id: string): Promise<PerufmeReponseDTO> {
     if (isNil(id)) throw new HttpException('id is required', HttpStatusCode.BadRequest);
@@ -48,10 +59,6 @@ export class PerfumesService {
     categoryId?: string;
     brandId?: string;
   }): Promise<ResponseDTO<PerufmeReponseDTO[]>> {
-    // await this.perfumeModel.create(
-    //   await generateDummyData(this.categoryService, this.brandService, this.perfumeCollectionService),
-    // );
-
     const _categoryId = categoryId && new mongoose.Types.ObjectId(categoryId);
     const _brandId = brandId && new mongoose.Types.ObjectId(brandId);
     const query = {
