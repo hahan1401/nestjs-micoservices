@@ -6,6 +6,9 @@ import { PerfumeCollectionEnum } from 'src/enums/PerfumeCollection';
 export class PerfumeCollection {
   @Prop({ type: String, required: true, unique: true, enum: PerfumeCollectionEnum })
   name: PerfumeCollectionEnum;
+
+  @Prop({ required: true })
+  thumbnailUrl: string;
 }
 
 export type PerfumeCollectionDocument = HydratedDocument<PerfumeCollection>;
