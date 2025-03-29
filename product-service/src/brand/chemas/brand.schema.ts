@@ -5,6 +5,12 @@ import { HydratedDocument } from 'mongoose';
 export class Brand {
   @Prop({ required: true })
   name: string;
+
+  @Prop({ required: true })
+  thumbnailUrl: string;
+
+  @Prop({ required: true })
+  description: string;
 }
 
 export type BrandDoctument = HydratedDocument<Brand>;

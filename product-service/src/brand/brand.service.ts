@@ -15,6 +15,7 @@ export class BrandService implements OnModuleInit {
     if (!isExisted) {
       const docs = Object.values(BRANDS_DUMMY).map((item) => item);
       await this.brandModel.insertMany(docs);
+
       console.info('Brands initialized');
     }
   }
