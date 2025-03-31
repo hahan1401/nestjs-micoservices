@@ -2,11 +2,13 @@ import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { Pagination } from 'src/common/Pagination';
 import { Public } from 'src/decorators/Public.decorator';
 import { ResponseDTO } from 'src/DTO/response.dto';
+import { OptionalParseIntPipe } from 'src/pipes/OptionalParseIntPipe.pipe';
 import { PaginationParseIntPipe } from 'src/pipes/PaginationParseIntPipe.pipe';
 import { DeleteItemStatus } from 'src/types/deleteItemStatus';
 import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
 import { PerfumesService } from './perfume.service';
+import { IPerfumeFilterFromQuery } from './types';
 
 @Controller('perfumes')
 export class PerfumesController {
@@ -16,13 +18,18 @@ export class PerfumesController {
   @Get('/')
   async getAll(
     @Query(PaginationParseIntPipe) pagination?: Pagination,
-    @Query('categoryId') categoryId?: string,
-    @Query('brandId') brandId?: string,
+    @Query('minPrice', OptionalParseIntPipe) minPrice?: number,
+    @Query('maxPrice', OptionalParseIntPipe) maxPrice?: number,
+    @Query() filter?: IPerfumeFilterFromQuery,
   ) {
     return this.perfumeService.getAll({
-      categoryId,
-      brandId,
       pagination: pagination,
+      filter: {
+        brands: filter.brands?.split(',') ?? [],
+        collections: filter.collections?.split(',') ?? [],
+        maxPrice: maxPrice,
+        minPrice: minPrice,
+      },
     });
   }
 

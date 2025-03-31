@@ -17,6 +17,7 @@ import { PerfumeCreateDto } from './DTO/PerfumeCreateDTO.dto';
 import { PerufmeReponseDTO } from './DTO/PerfumeResponseDTO.dto';
 import { generateDummyData } from './schemas/dummyData';
 import { Perfume, PerfumeDocument, PerfumePopulateKeys } from './schemas/perfume.schema';
+import { IPerfumeFilter } from './types';
 
 @Injectable()
 export class PerfumesService implements OnModuleInit {
@@ -51,19 +52,17 @@ export class PerfumesService implements OnModuleInit {
   }
 
   async getAll({
-    categoryId,
     pagination,
-    brandId,
+    filter,
   }: {
     pagination?: Pagination;
-    categoryId?: string;
-    brandId?: string;
+    filter?: IPerfumeFilter;
   }): Promise<ResponseDTO<PerufmeReponseDTO[]>> {
-    const _categoryId = categoryId && new mongoose.Types.ObjectId(categoryId);
-    const _brandId = brandId && new mongoose.Types.ObjectId(brandId);
+    const categories = await this.categoryService.find({ name: { $in: filter.brands } });
+    console.log('categories', categories);
     const query = {
-      ...(_categoryId ? { categoryId: _categoryId } : {}),
-      ...(_brandId ? { brandId: _brandId } : {}),
+      // ...(filter.brands ? { $in } : {}),
+      // ...(_brandId ? { brandId: _brandId } : {}),
     };
     const aggregationPipeline = [
       { $match: query },
